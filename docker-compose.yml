@@ -1,22 +1,26 @@
-version: '3.8'
-
 services:
   # The FastAPI application service
   app:
     build: .
+    container_name: dokydoc_app
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app/app
+      # Mount the entire project directory for live-reloading
+      - .:/app
     environment:
       - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/dokydoc
+      # This explicitly tells Python where to look for modules.
+      - PYTHONPATH=/app
     depends_on:
       - db
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    # The command to run the application
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   # The PostgreSQL database service
   db:
     image: postgres:15-alpine
+    container_name: dokydoc_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
